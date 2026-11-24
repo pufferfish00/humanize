@@ -96,7 +96,15 @@ def naturalsize(
         return _("%d Byte") % int(bytes_)
 
     if abs_bytes < base:
-        return f"{int(bytes_)}B" if gnu else _("%d Bytes") % int(bytes_)
+        # Preserve integer values (including floats that represent whole numbers)
+        if isinstance(value, int) or (isinstance(value, float) and value.is_integer()):
+            return f"{int(bytes_)}B" if gnu else _("%d Bytes") % int(bytes_)
+        # Format non‑integer values using the provided format
+        formatted = format % bytes_
+        if gnu:
+            return f"{formatted}B"
+        else:
+            return f"{formatted} Bytes"
 
     exp = int(min(log(abs_bytes, base), len(suffix)))
     # The suffix is chosen from the unrounded byte count, but `format` rounds the
